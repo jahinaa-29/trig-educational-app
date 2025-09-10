@@ -1,0 +1,725 @@
+classdef TRIGQUIZ < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                    matlab.ui.Figure
+        Menu                        matlab.ui.container.Menu
+        LessonModeMenu              matlab.ui.container.Menu
+        PythagoreanTheoremMenu      matlab.ui.container.Menu
+        TrigonometricFunctionsMenu  matlab.ui.container.Menu
+        LampLabel                   matlab.ui.control.Label
+        RightLamp                   matlab.ui.control.Lamp
+        MiddleLap                   matlab.ui.control.Lamp
+        LeftLamp                    matlab.ui.control.Lamp
+        CheckAnswer                 matlab.ui.control.Button
+        HintDisp_mini2              matlab.ui.control.Label
+        HintDisp_mini1              matlab.ui.control.Label
+        HintDispMain                matlab.ui.control.Label
+        Hint                        matlab.ui.control.Button
+        ShowSolution                matlab.ui.control.Button
+        Next                        matlab.ui.control.Button
+        Previous                    matlab.ui.control.Button
+        Image                       matlab.ui.control.Image
+        Exit                        matlab.ui.control.Button
+        MODELabel                   matlab.ui.control.Label
+        Button                      matlab.ui.control.Button
+        QuestionPanel               matlab.ui.container.Panel
+        CurrQ                       matlab.ui.control.Label
+        EnterYourAnswerEditFieldLabel_2  matlab.ui.control.Label
+        Feedback                    matlab.ui.control.Label
+        SolutionPanel               matlab.ui.container.Panel
+        ExplainTxt                  matlab.ui.control.Label
+        Answer                      matlab.ui.control.Label
+        Explanation                 matlab.ui.control.Label
+        AnswerLabel                 matlab.ui.control.Label
+        SolLabel                    matlab.ui.control.Label
+        CurrImage                   matlab.ui.control.Image
+        UserAnswer                  matlab.ui.control.EditField
+        LivesLostPanel              matlab.ui.container.Panel
+        LessonButton                matlab.ui.control.Button
+        RestartButton               matlab.ui.control.Button
+        UhOh                        matlab.ui.control.Label
+        Panel                       matlab.ui.container.Panel
+        BEGINButton                 matlab.ui.control.Button
+        NOTESLabel                  matlab.ui.control.Label
+    end
+
+    
+    properties (Access = public)
+
+    LivesLeft= 3; 
+    
+
+    end
+    
+    properties (Access = private)
+       QuestionBank table
+       CurrQi=1;
+    end
+
+   methods (Access = private)
+
+        % Create UIFigure and components 
+        
+      
+        
+        function loseLife(app) % TAKE CARE OF LIVES
+
+            if app.LivesLeft > 0
+
+                app.LivesLeft = app.LivesLeft - 1;
+        
+                switch app.LivesLeft
+
+                    case 2
+                        app.RightLamp.Color = [0.81,0.82,0.87]; % gray
+                    case 1
+                        app.MiddleLap.Color = [0.81,0.82,0.87];
+                    case 0
+                        app.LeftLamp.Color = [0.81,0.82,0.87];
+                     
+                end
+            end
+            if app.LivesLeft == 0 
+                app.LivesLostPanel.Visible="on";
+                uistack(app.LivesLostPanel, 'top');
+            end
+        end
+        
+      
+        function qBank(app)
+            
+            app.QuestionBank = table( ...
+            { ...
+                '1. If Side AB is 6 and Side BC is 8, what is Side AC?'; ...
+                '2. What is the sum of all internal angles in any triangle?'; ...
+                '3. If angle A is 30° and the hypotenuse is 10, what is the length of the side opposite A?'; ...
+                '4. The opposite side is 3 and hypotenuse is 5. What is sin(θ)?'; ...
+                '5. If angle θ increases in a right triangle, what happens to the length of the opposite side (assuming hypotenuse stays the same)? Enter INC / DEC'; ...
+                '6. Which trig function compares opposite and adjacent sides? Enter sin/cos/tan'; ...
+                '7. If sin(θ) = 0.6 and the hypotenuse is 5, what’s the opposite side?'; ...
+            }, ...
+            { ...
+                '1.png'; ...
+                '2.png'; ...
+                '3.png'; ...
+                '4.png'; ...
+                '5.png'; ...
+                '6.png'; ...
+                '7.png'; ...
+            }, ...
+            { ...
+                '10'; ...
+                '180'; ...
+                '5'; ...
+                '0.6'; ...
+                'INC'; ...
+                'tan'; ...
+                '3'; ...
+            }, ...
+            { ...
+                'Use the Pythagorean Theorem: √(6² + 8²) = √(36 + 64) = √100 = 10'; ...
+                'Always 180°—it’s like triangle law of gravity! 🍎'; ...
+                'sin(30°) = 0.5, and 0.5 × 10 = 5'; ...
+                'sin(θ) = opposite / hypotenuse = 3 / 5 = 0.6'; ...
+                'In a right triangle: sin(θ) = opposite / hypotenuse. If the hypotenuse stays the same and θ increases, sine increases — so the opposite side must get longer.'; ...
+                'Both sets follow the same ratio: divide each by 2, they match!'; ...
+                'They’re exactly the same size and shape—perfect match!'; ...
+            }, ...
+            { ...
+                '  It''s a right triangle! Which rule do we use? 📐  '; ...
+                '  Think of slicing a triangle into smaller angles—they always add up to the same! 🍕  '; ...
+                '  Remember SOH-CAH-TOA! 🧠  '; ...
+                '  Remember SOH-CAH-TOA! 🧠  '; ...
+                '  Picture the triangle “opening up” like a fan — that opposite side’s gonna stretch out! 🪭  '; ...
+                '  SOH CAH TOA — it is the TOA one. 🙈  '; ...
+                '  sin(θ) = opposite/hypotenuse ➗  '; ...
+            }, ...
+            'VariableNames', {'Question', 'Image', 'CorrectAns', 'Solution', 'Hint'});
+        
+                end
+        
+        % DISPLAY QUESTION
+        function loadQuestion(app)
+            q = app.QuestionBank(app.CurrQi, :);
+
+            app.CurrQ.Text = q.Question{1};
+
+            appFolder = fileparts(mfilename('fullpath'));
+            imgPath = fullfile(appFolder, 'images', q.Image{1});
+
+                
+                
+            if ~isempty(q.Image{1}) && isfile(imgPath)
+                app.CurrImage.ImageSource = imgPath;
+                app.CurrImage.Visible = "on";
+            else
+                app.CurrImage.Visible = "off";
+            end
+
+                
+            app.SolutionPanel.Visible = "off";
+                
+        end
+        
+        
+   end
+
+
+            
+       
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Menu selected function: PythagoreanTheoremMenu
+        function PythagoreanTheoremMenuSelected(app, event)
+
+            app.messageLabel.Text = ' Taking you to Lesson Mode: Pythagorean Theorem... 📚';
+            app.messageLabel.BackgroundColor = [1.00 0.95 0.85];
+            pause(2.0);
+            app.messageLabel.Text = '';
+         
+            TRIGLESSON();
+
+            delete(app);
+            
+        end
+
+        % Button pushed function: Next
+        function NextButtonPushed(app, event)
+            app.CurrQi = app.CurrQi + 1;
+
+            % Loop back to first question if at the end
+            if app.CurrQi > height(app.QuestionBank)
+                app.CurrQi = 1;
+            end
+        
+            loadQuestion(app);
+            app.UserAnswer.Value='';
+            app.Feedback.Text = '';
+        end
+
+        % Button pushed function: Hint
+        function HintButtonPushed(app, event)
+            app.HintDispMain.BackgroundColor = [1 1 1];
+            app.HintDisp_mini1.BackgroundColor = [1 1 1];
+            app.HintDisp_mini2.BackgroundColor = [1 1 1];
+
+            uistack(app.HintDispMain, 'top');
+            uistack(app.HintDisp_mini1, 'top');
+            uistack(app.HintDisp_mini2, 'top');
+
+            hint = app.QuestionBank.Hint{app.CurrQi};
+
+            app.HintDispMain.Text = hint;
+
+            pause(3.0);
+
+            app.HintDispMain.Text = '';
+            app.HintDisp_mini1.BackgroundColor = 'none';
+            app.HintDisp_mini2.BackgroundColor = 'none';
+            app.HintDispMain.BackgroundColor = 'none';
+
+
+            
+        end
+
+        % Button pushed function: ShowSolution
+        function ShowSolutionButtonPushed(app, event)
+            
+            if strcmp(app.SolutionPanel.Visible, "on")
+                % Hide 
+                app.SolutionPanel.Visible = "off";
+                app.ShowSolution.Text = 'Show Solution 🔍';
+                app.ExplainTxt.Text = '';
+                app.Answer.Text = '';
+
+            else
+    
+                % Show 
+                app.SolutionPanel.Visible = "on";
+                app.ExplainTxt.Text = app.QuestionBank.Solution(app.CurrQi);
+                app.Answer.Text = app.QuestionBank.CorrectAns(app.CurrQi);
+                app.ShowSolution.Text = 'Hide Solution 🔍';
+            end
+
+
+        end
+
+        % Button pushed function: Previous
+        function PreviousButtonPushed(app, event)
+            if app.CurrQi > 1
+                app.CurrQi = app.CurrQi - 1;
+                loadQuestion(app); 
+            end
+        end
+
+        % Button pushed function: BEGINButton
+        function BEGINButtonPushed(app, event)
+          delete(app.Panel);
+          
+          app.LivesLeft = 3;
+          app.LeftLamp.Color = [0.43,1.00,0.65];      
+          app.MiddleLap.Color = [0.43,1.00,0.65];   
+          app.RightLamp.Color = [0.43,1.00,0.65]; 
+          app.UserAnswer.Value = '';
+
+          app.qBank()
+
+          app.LeftLamp.Visible="on";
+          app.MiddleLap.Visible="on";
+          app.RightLamp.Visible="on";
+          app.LampLabel.Visible ="on";
+          app.QuestionPanel.Visible="on";
+          app.Next.Visible="on";
+          app.Previous.Visible="on";
+          app.ShowSolution.Visible="on";
+          app.Hint.Visible="on";
+          app.CheckAnswer.Visible="on";
+
+          app.CurrQi = 1;
+          loadQuestion(app);
+        end
+
+        % Button pushed function: CheckAnswer
+        function CheckAnswerButtonPushed(app, event)
+            answer = app.UserAnswer.Value;
+
+             if isempty(answer)
+                app.Feedback.Text = ' Oops! You forgot to enter an answer!';
+                app.Feedback.FontColor = [0.85, 0.33, 0.10];
+                return;
+             end
+
+             correct_ans = app.QuestionBank.CorrectAns{app.CurrQi};
+
+            if strcmp(answer, correct_ans)
+                app.Feedback.Text = ' Correct! Good work!';
+                app.Feedback.FontColor = [0.22,0.65,0.44];
+            else
+                app.Feedback.Text = ' Not quite! Try again!';
+                app.Feedback.FontColor = [0.81,0.07,0.40];
+                loseLife(app);
+            end
+
+           
+        end
+
+        % Button pushed function: RestartButton
+        function RestartButtonPushed(app, event)
+            BEGINButtonPushed(app);
+            app.LivesLostPanel.Visible="off";
+            uistack(app.LivesLostPanel, 'bottom');
+        end
+
+        % Button pushed function: LessonButton
+        function LessonButtonPushed(app, event)
+            app.QuizModeLabel.Text = ' Taking you to Lessons... 📚';
+            app.QuizModeLabel.BackgroundColor = [0.96 0.47 0.16];
+            pause(2.0);
+            app.QuizModeLabel.Text = '';
+          
+            LESSONMODEMAIN();
+
+            delete(app);
+            
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Get the file path for locating images
+            pathToMLAPP = fileparts(mfilename('fullpath'));
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Color = [0.1608 0.349 0.749];
+            app.UIFigure.Position = [100 100 1237 898];
+            app.UIFigure.Name = 'MATLAB App';
+            app.UIFigure.Theme = 'light';
+
+            % Create Menu
+            app.Menu = uimenu(app.UIFigure);
+            app.Menu.Text = 'Menu';
+
+            % Create LessonModeMenu
+            app.LessonModeMenu = uimenu(app.Menu);
+            app.LessonModeMenu.ForegroundColor = [0 0 0];
+            app.LessonModeMenu.Separator = 'on';
+            app.LessonModeMenu.Text = 'Lesson Mode';
+
+            % Create PythagoreanTheoremMenu
+            app.PythagoreanTheoremMenu = uimenu(app.LessonModeMenu);
+            app.PythagoreanTheoremMenu.MenuSelectedFcn = createCallbackFcn(app, @PythagoreanTheoremMenuSelected, true);
+            app.PythagoreanTheoremMenu.Text = 'Pythagorean Theorem';
+
+            % Create TrigonometricFunctionsMenu
+            app.TrigonometricFunctionsMenu = uimenu(app.LessonModeMenu);
+            app.TrigonometricFunctionsMenu.Text = 'Trigonometric Functions';
+
+            % Create Panel
+            app.Panel = uipanel(app.UIFigure);
+            app.Panel.ForegroundColor = [1 0.9098 0.3922];
+            app.Panel.BackgroundColor = [1 0.949 0.851];
+            app.Panel.Position = [340 158 613 451];
+
+            % Create NOTESLabel
+            app.NOTESLabel = uilabel(app.Panel);
+            app.NOTESLabel.HorizontalAlignment = 'center';
+            app.NOTESLabel.WordWrap = 'on';
+            app.NOTESLabel.FontName = 'Yuanti SC';
+            app.NOTESLabel.FontSize = 20;
+            app.NOTESLabel.FontWeight = 'bold';
+            app.NOTESLabel.FontColor = [0.2627 0.3569 0.5608];
+            app.NOTESLabel.Position = [60 34 503 295];
+            app.NOTESLabel.Text = {''; '----- CONTROLS -----'; ''; '> To exit PRACTICE, click Exit ↩️'; '> To go to the next question, click Next ➡️'; '> To go to the previous question, click Previous ⬅️'; '> To get a hint, click Hint 💡'; '> To see the solution, click Show Solution 🔍'; ''; '--------------------'; ''; 'GOOD LUCK! 🍀'};
+
+            % Create BEGINButton
+            app.BEGINButton = uibutton(app.Panel, 'push');
+            app.BEGINButton.ButtonPushedFcn = createCallbackFcn(app, @BEGINButtonPushed, true);
+            app.BEGINButton.BackgroundColor = [1 0.8824 0.2196];
+            app.BEGINButton.FontName = 'Yuanti SC';
+            app.BEGINButton.FontSize = 28;
+            app.BEGINButton.FontWeight = 'bold';
+            app.BEGINButton.FontColor = [0.1608 0.349 0.749];
+            app.BEGINButton.Position = [145 339 322 58];
+            app.BEGINButton.Text = 'BEGIN PRACTICE';
+
+            % Create LivesLostPanel
+            app.LivesLostPanel = uipanel(app.UIFigure);
+            app.LivesLostPanel.ForegroundColor = [1 0.9098 0.3922];
+            app.LivesLostPanel.Visible = 'off';
+            app.LivesLostPanel.BackgroundColor = [1 0.949 0.851];
+            app.LivesLostPanel.Position = [407 275 479 245];
+
+            % Create UhOh
+            app.UhOh = uilabel(app.LivesLostPanel);
+            app.UhOh.HorizontalAlignment = 'center';
+            app.UhOh.WordWrap = 'on';
+            app.UhOh.FontName = 'Yuanti SC';
+            app.UhOh.FontSize = 24;
+            app.UhOh.FontWeight = 'bold';
+            app.UhOh.FontColor = [0.2627 0.3569 0.5608];
+            app.UhOh.Position = [80 180 327 32];
+            app.UhOh.Text = 'Uh oh! You ran out of lives! 💔';
+
+            % Create RestartButton
+            app.RestartButton = uibutton(app.LivesLostPanel, 'push');
+            app.RestartButton.ButtonPushedFcn = createCallbackFcn(app, @RestartButtonPushed, true);
+            app.RestartButton.BackgroundColor = [0.2196 0.651 0.4392];
+            app.RestartButton.FontName = 'Yuanti SC';
+            app.RestartButton.FontSize = 20;
+            app.RestartButton.FontWeight = 'bold';
+            app.RestartButton.FontColor = [1 1 1];
+            app.RestartButton.Position = [158 123 162 33];
+            app.RestartButton.Text = 'Restart 🔄';
+
+            % Create LessonButton
+            app.LessonButton = uibutton(app.LivesLostPanel, 'push');
+            app.LessonButton.ButtonPushedFcn = createCallbackFcn(app, @LessonButtonPushed, true);
+            app.LessonButton.BackgroundColor = [0.1843 0.7451 0.9373];
+            app.LessonButton.FontName = 'Yuanti SC';
+            app.LessonButton.FontSize = 20;
+            app.LessonButton.FontWeight = 'bold';
+            app.LessonButton.FontColor = [1 1 1];
+            app.LessonButton.Position = [158 23 162 33];
+            app.LessonButton.Text = 'Go to Lessons📚';
+
+            % Create QuestionPanel
+            app.QuestionPanel = uipanel(app.UIFigure);
+            app.QuestionPanel.Visible = 'off';
+            app.QuestionPanel.BackgroundColor = [1 0.949 0.851];
+            app.QuestionPanel.Position = [156 127 958 540];
+
+            % Create UserAnswer
+            app.UserAnswer = uieditfield(app.QuestionPanel, 'text');
+            app.UserAnswer.FontName = 'Yuanti SC';
+            app.UserAnswer.FontSize = 28;
+            app.UserAnswer.FontWeight = 'bold';
+            app.UserAnswer.FontColor = [0.0667 0.4431 0.7451];
+            app.UserAnswer.Position = [330 29 100 39];
+
+            % Create CurrImage
+            app.CurrImage = uiimage(app.QuestionPanel);
+            app.CurrImage.Position = [45 106 440 296];
+
+            % Create SolutionPanel
+            app.SolutionPanel = uipanel(app.QuestionPanel);
+            app.SolutionPanel.BorderColor = [0.0667 0.4431 0.7451];
+            app.SolutionPanel.HighlightColor = [0.0667 0.4431 0.7451];
+            app.SolutionPanel.BorderWidth = 5;
+            app.SolutionPanel.Visible = 'off';
+            app.SolutionPanel.BackgroundColor = [1 0.9882 0.9412];
+            app.SolutionPanel.Position = [502 117 372 265];
+
+            % Create SolLabel
+            app.SolLabel = uilabel(app.SolutionPanel);
+            app.SolLabel.BackgroundColor = [0.0667 0.4431 0.7451];
+            app.SolLabel.HorizontalAlignment = 'center';
+            app.SolLabel.FontName = 'Yuanti SC';
+            app.SolLabel.FontSize = 24;
+            app.SolLabel.FontWeight = 'bold';
+            app.SolLabel.FontColor = [1 1 1];
+            app.SolLabel.Position = [1 211 367 34];
+            app.SolLabel.Text = 'SOLUTION';
+
+            % Create AnswerLabel
+            app.AnswerLabel = uilabel(app.SolutionPanel);
+            app.AnswerLabel.BackgroundColor = [0.2196 0.651 0.4392];
+            app.AnswerLabel.FontName = 'Yuanti SC';
+            app.AnswerLabel.FontSize = 20;
+            app.AnswerLabel.FontAngle = 'italic';
+            app.AnswerLabel.FontColor = [1 1 1];
+            app.AnswerLabel.Position = [30 162 83 30];
+            app.AnswerLabel.Text = ' Answer:';
+
+            % Create Explanation
+            app.Explanation = uilabel(app.SolutionPanel);
+            app.Explanation.FontName = 'Yuanti SC';
+            app.Explanation.FontSize = 20;
+            app.Explanation.FontWeight = 'bold';
+            app.Explanation.FontAngle = 'italic';
+            app.Explanation.FontColor = [0.0667 0.4431 0.7451];
+            app.Explanation.Position = [30 113 189 30];
+            app.Explanation.Text = {'Explanation:'; ''};
+
+            % Create Answer
+            app.Answer = uilabel(app.SolutionPanel);
+            app.Answer.HorizontalAlignment = 'center';
+            app.Answer.WordWrap = 'on';
+            app.Answer.FontName = 'Yuanti SC';
+            app.Answer.FontSize = 24;
+            app.Answer.FontWeight = 'bold';
+            app.Answer.FontColor = [0.502 0.502 0.502];
+            app.Answer.Position = [123 160 42 32];
+            app.Answer.Text = '';
+
+            % Create ExplainTxt
+            app.ExplainTxt = uilabel(app.SolutionPanel);
+            app.ExplainTxt.HorizontalAlignment = 'center';
+            app.ExplainTxt.WordWrap = 'on';
+            app.ExplainTxt.FontName = 'Yuanti SC';
+            app.ExplainTxt.FontSize = 18;
+            app.ExplainTxt.FontColor = [0.502 0.502 0.502];
+            app.ExplainTxt.Position = [30 27 303 87];
+            app.ExplainTxt.Text = '';
+
+            % Create Feedback
+            app.Feedback = uilabel(app.QuestionPanel);
+            app.Feedback.VerticalAlignment = 'bottom';
+            app.Feedback.WordWrap = 'on';
+            app.Feedback.FontName = 'Yuanti SC';
+            app.Feedback.FontSize = 24;
+            app.Feedback.FontWeight = 'bold';
+            app.Feedback.FontColor = [1 1 1];
+            app.Feedback.Position = [486 30 310 78];
+            app.Feedback.Text = '';
+
+            % Create EnterYourAnswerEditFieldLabel_2
+            app.EnterYourAnswerEditFieldLabel_2 = uilabel(app.QuestionPanel);
+            app.EnterYourAnswerEditFieldLabel_2.HorizontalAlignment = 'right';
+            app.EnterYourAnswerEditFieldLabel_2.FontName = 'Yuanti SC';
+            app.EnterYourAnswerEditFieldLabel_2.FontSize = 28;
+            app.EnterYourAnswerEditFieldLabel_2.FontWeight = 'bold';
+            app.EnterYourAnswerEditFieldLabel_2.FontColor = [0.149 0.149 0.149];
+            app.EnterYourAnswerEditFieldLabel_2.Position = [80 31 235 37];
+            app.EnterYourAnswerEditFieldLabel_2.Text = 'Enter Your Answer';
+
+            % Create CurrQ
+            app.CurrQ = uilabel(app.QuestionPanel);
+            app.CurrQ.VerticalAlignment = 'bottom';
+            app.CurrQ.WordWrap = 'on';
+            app.CurrQ.FontName = 'Yuanti SC';
+            app.CurrQ.FontSize = 28;
+            app.CurrQ.Position = [82 450 764 66];
+            app.CurrQ.Text = '';
+
+            % Create Button
+            app.Button = uibutton(app.UIFigure, 'push');
+            app.Button.Position = [-112 962 2 2];
+
+            % Create MODELabel
+            app.MODELabel = uilabel(app.UIFigure);
+            app.MODELabel.BackgroundColor = [0.9608 0.4706 0.1608];
+            app.MODELabel.HorizontalAlignment = 'center';
+            app.MODELabel.FontName = 'Yuanti SC';
+            app.MODELabel.FontSize = 36;
+            app.MODELabel.FontWeight = 'bold';
+            app.MODELabel.FontColor = [1 1 1];
+            app.MODELabel.Position = [2 770 1235 62];
+            app.MODELabel.Text = 'PRACTICE MODE';
+
+            % Create Exit
+            app.Exit = uibutton(app.UIFigure, 'push');
+            app.Exit.BackgroundColor = [1 0.8824 0.2196];
+            app.Exit.FontName = 'Yuanti SC';
+            app.Exit.FontSize = 20;
+            app.Exit.FontWeight = 'bold';
+            app.Exit.FontColor = [0.1608 0.349 0.749];
+            app.Exit.Enable = 'off';
+            app.Exit.Visible = 'off';
+            app.Exit.Position = [22 844 96 35];
+            app.Exit.Text = 'Exit ↩️';
+
+            % Create Image
+            app.Image = uiimage(app.UIFigure);
+            app.Image.Position = [927 -17 347 293];
+            app.Image.ImageSource = fullfile(pathToMLAPP, 'mascot.png');
+
+            % Create Previous
+            app.Previous = uibutton(app.UIFigure, 'push');
+            app.Previous.ButtonPushedFcn = createCallbackFcn(app, @PreviousButtonPushed, true);
+            app.Previous.BackgroundColor = [1 0.8824 0.2196];
+            app.Previous.FontName = 'Yuanti SC';
+            app.Previous.FontSize = 24;
+            app.Previous.FontWeight = 'bold';
+            app.Previous.FontColor = [0.1608 0.349 0.749];
+            app.Previous.Visible = 'off';
+            app.Previous.Position = [162 55 134 44];
+            app.Previous.Text = '⬅️ Previous';
+
+            % Create Next
+            app.Next = uibutton(app.UIFigure, 'push');
+            app.Next.ButtonPushedFcn = createCallbackFcn(app, @NextButtonPushed, true);
+            app.Next.BackgroundColor = [1 0.8824 0.2196];
+            app.Next.FontName = 'Yuanti SC';
+            app.Next.FontSize = 24;
+            app.Next.FontWeight = 'bold';
+            app.Next.FontColor = [0.1608 0.349 0.749];
+            app.Next.Visible = 'off';
+            app.Next.Position = [1001 687 114 44];
+            app.Next.Text = 'Next ➡️';
+
+            % Create ShowSolution
+            app.ShowSolution = uibutton(app.UIFigure, 'push');
+            app.ShowSolution.ButtonPushedFcn = createCallbackFcn(app, @ShowSolutionButtonPushed, true);
+            app.ShowSolution.BackgroundColor = [1 0.8824 0.2196];
+            app.ShowSolution.FontName = 'Yuanti SC';
+            app.ShowSolution.FontSize = 24;
+            app.ShowSolution.FontWeight = 'bold';
+            app.ShowSolution.FontColor = [0.1608 0.349 0.749];
+            app.ShowSolution.Visible = 'off';
+            app.ShowSolution.Position = [580 55 206 44];
+            app.ShowSolution.Text = 'Show Solution 🔍';
+
+            % Create Hint
+            app.Hint = uibutton(app.UIFigure, 'push');
+            app.Hint.ButtonPushedFcn = createCallbackFcn(app, @HintButtonPushed, true);
+            app.Hint.BackgroundColor = [1 0.8824 0.2196];
+            app.Hint.FontName = 'Yuanti SC';
+            app.Hint.FontSize = 24;
+            app.Hint.FontWeight = 'bold';
+            app.Hint.FontColor = [0.1608 0.349 0.749];
+            app.Hint.Visible = 'off';
+            app.Hint.Position = [813 55 111 44];
+            app.Hint.Text = 'Hint 💡';
+
+            % Create HintDispMain
+            app.HintDispMain = uilabel(app.UIFigure);
+            app.HintDispMain.HorizontalAlignment = 'center';
+            app.HintDispMain.WordWrap = 'on';
+            app.HintDispMain.FontName = 'Yuanti SC';
+            app.HintDispMain.FontSize = 20;
+            app.HintDispMain.FontAngle = 'italic';
+            app.HintDispMain.FontColor = [0.149 0.149 0.149];
+            app.HintDispMain.Position = [774 265 414 134];
+            app.HintDispMain.Text = '';
+
+            % Create HintDisp_mini1
+            app.HintDisp_mini1 = uilabel(app.UIFigure);
+            app.HintDisp_mini1.HorizontalAlignment = 'center';
+            app.HintDisp_mini1.WordWrap = 'on';
+            app.HintDisp_mini1.FontName = 'Yuanti SC';
+            app.HintDisp_mini1.FontSize = 18;
+            app.HintDisp_mini1.FontAngle = 'italic';
+            app.HintDisp_mini1.FontColor = [0.149 0.149 0.149];
+            app.HintDisp_mini1.Position = [1144 244 26 32];
+            app.HintDisp_mini1.Text = '';
+
+            % Create HintDisp_mini2
+            app.HintDisp_mini2 = uilabel(app.UIFigure);
+            app.HintDisp_mini2.HorizontalAlignment = 'center';
+            app.HintDisp_mini2.WordWrap = 'on';
+            app.HintDisp_mini2.FontName = 'Yuanti SC';
+            app.HintDisp_mini2.FontSize = 18;
+            app.HintDisp_mini2.FontAngle = 'italic';
+            app.HintDisp_mini2.FontColor = [0.149 0.149 0.149];
+            app.HintDisp_mini2.Position = [1162 233 16 23];
+            app.HintDisp_mini2.Text = '';
+
+            % Create CheckAnswer
+            app.CheckAnswer = uibutton(app.UIFigure, 'push');
+            app.CheckAnswer.ButtonPushedFcn = createCallbackFcn(app, @CheckAnswerButtonPushed, true);
+            app.CheckAnswer.BackgroundColor = [0.9608 0.4667 0.1608];
+            app.CheckAnswer.FontName = 'Yuanti SC';
+            app.CheckAnswer.FontSize = 24;
+            app.CheckAnswer.FontWeight = 'bold';
+            app.CheckAnswer.FontColor = [1 1 1];
+            app.CheckAnswer.Visible = 'off';
+            app.CheckAnswer.Position = [328 55 207 44];
+            app.CheckAnswer.Text = 'CHECK ANSWER';
+
+            % Create LeftLamp
+            app.LeftLamp = uilamp(app.UIFigure);
+            app.LeftLamp.Visible = 'off';
+            app.LeftLamp.Position = [272 687 33 33];
+            app.LeftLamp.Color = [0.4314 1 0.6471];
+
+            % Create MiddleLap
+            app.MiddleLap = uilamp(app.UIFigure);
+            app.MiddleLap.Visible = 'off';
+            app.MiddleLap.Position = [314 687 33 33];
+            app.MiddleLap.Color = [0.4314 1 0.6471];
+
+            % Create RightLamp
+            app.RightLamp = uilamp(app.UIFigure);
+            app.RightLamp.Visible = 'off';
+            app.RightLamp.Position = [356 687 33 33];
+            app.RightLamp.Color = [0.4314 1 0.651];
+
+            % Create LampLabel
+            app.LampLabel = uilabel(app.UIFigure);
+            app.LampLabel.HorizontalAlignment = 'center';
+            app.LampLabel.FontName = 'Yuanti SC';
+            app.LampLabel.FontSize = 28;
+            app.LampLabel.FontWeight = 'bold';
+            app.LampLabel.FontColor = [1 0.9098 0.3882];
+            app.LampLabel.Visible = 'off';
+            app.LampLabel.Position = [172 680 114 48];
+            app.LampLabel.Text = 'LIVES';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = TRIGQUIZ
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
