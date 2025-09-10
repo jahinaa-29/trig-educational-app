@@ -1,0 +1,152 @@
+classdef LESSONMODEMAIN < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure          matlab.ui.Figure
+        Menu              matlab.ui.container.Menu
+        PracticeModeMenu  matlab.ui.container.Menu
+        QuizModeLabel     matlab.ui.control.Label
+        PYTHLESSON        matlab.ui.control.Button
+        trigButton        matlab.ui.control.Button
+        Button            matlab.ui.control.Button
+        LESSONSLabel      matlab.ui.control.Label
+    end
+
+  
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: PYTHLESSON
+        function PYTHLESSONPushed(app, event)
+            app.QuizModeLabel.Text = ' Taking you to Lesson Mode: Pythagorean Theorem... 📚';
+            app.QuizModeLabel.BackgroundColor = [0.96 0.47 0.16];
+            pause(2.0);
+            app.QuizModeLabel.Text = '';
+          
+            TRIGLESSON();
+
+            delete(app);
+        end
+
+        % Button pushed function: trigButton
+        function trigButtonPushed(app, event)
+            app.QuizModeLabel.Text = ' Taking you to Lesson Mode: Trigonometric Functions... 📚';
+            app.QuizModeLabel.BackgroundColor = [0.96 0.47 0.16];
+            pause(2.0);
+            app.QuizModeLabel.Text = '';
+          
+            TRIG_FUNC();
+
+            delete(app);
+        end
+
+        % Menu selected function: PracticeModeMenu
+        function PracticeModeMenuSelected(app, event)
+            app.QuizModeLabel.Text = ' Taking you to Practice Mode... 📝';
+            app.QuizModeLabel.BackgroundColor = [0.96 0.47 0.16];
+            pause(2.0);
+            app.QuizModeLabel.Text = '';
+          
+            TRIGQUIZ();
+
+            delete(app);
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Get the file path for locating images
+            pathToMLAPP = fileparts(mfilename('fullpath'));
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Color = [1 0.949 0.851];
+            app.UIFigure.Position = [100 100 1237 898];
+            app.UIFigure.Name = 'MATLAB App';
+            app.UIFigure.Theme = 'light';
+
+            % Create Menu
+            app.Menu = uimenu(app.UIFigure);
+            app.Menu.Text = 'Menu';
+
+            % Create PracticeModeMenu
+            app.PracticeModeMenu = uimenu(app.Menu);
+            app.PracticeModeMenu.MenuSelectedFcn = createCallbackFcn(app, @PracticeModeMenuSelected, true);
+            app.PracticeModeMenu.Text = 'Practice Mode';
+
+            % Create LESSONSLabel
+            app.LESSONSLabel = uilabel(app.UIFigure);
+            app.LESSONSLabel.BackgroundColor = [0.1608 0.349 0.749];
+            app.LESSONSLabel.HorizontalAlignment = 'center';
+            app.LESSONSLabel.FontName = 'Yuanti SC';
+            app.LESSONSLabel.FontSize = 36;
+            app.LESSONSLabel.FontWeight = 'bold';
+            app.LESSONSLabel.FontColor = [1 1 1];
+            app.LESSONSLabel.Position = [1 825 1237 62];
+            app.LESSONSLabel.Text = 'LESSONS';
+
+            % Create Button
+            app.Button = uibutton(app.UIFigure, 'push');
+            app.Button.Position = [-112 962 2 2];
+
+            % Create trigButton
+            app.trigButton = uibutton(app.UIFigure, 'push');
+            app.trigButton.ButtonPushedFcn = createCallbackFcn(app, @trigButtonPushed, true);
+            app.trigButton.Icon = fullfile(pathToMLAPP, 'TRIGFUNC.png');
+            app.trigButton.BackgroundColor = [0.2157 0.6549 0.4431];
+            app.trigButton.Position = [130 84 978 312];
+            app.trigButton.Text = '';
+
+            % Create PYTHLESSON
+            app.PYTHLESSON = uibutton(app.UIFigure, 'push');
+            app.PYTHLESSON.ButtonPushedFcn = createCallbackFcn(app, @PYTHLESSONPushed, true);
+            app.PYTHLESSON.Icon = fullfile(pathToMLAPP, 'PYTH.png');
+            app.PYTHLESSON.BackgroundColor = [0.8196 0.0157 0.5451];
+            app.PYTHLESSON.Position = [130 451 978 311];
+            app.PYTHLESSON.Text = '';
+
+            % Create QuizModeLabel
+            app.QuizModeLabel = uilabel(app.UIFigure);
+            app.QuizModeLabel.HorizontalAlignment = 'center';
+            app.QuizModeLabel.FontName = 'Yuanti SC';
+            app.QuizModeLabel.FontSize = 24;
+            app.QuizModeLabel.FontWeight = 'bold';
+            app.QuizModeLabel.FontAngle = 'italic';
+            app.QuizModeLabel.FontColor = [1 1 1];
+            app.QuizModeLabel.Position = [192 395 866 147];
+            app.QuizModeLabel.Text = '';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = LESSONMODEMAIN
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
