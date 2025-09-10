@@ -1,0 +1,679 @@
+classdef TRIG_FUNC < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                     matlab.ui.Figure
+        Menu                         matlab.ui.container.Menu
+        LessonModeMenu               matlab.ui.container.Menu
+        PythagoreanTheoremMenu       matlab.ui.container.Menu
+        PracticeModeMenu             matlab.ui.container.Menu
+        QuizModeLabel                matlab.ui.control.Label
+        tanEditField                 matlab.ui.control.NumericEditField
+        tanEditFieldLabel            matlab.ui.control.Label
+        Button_9                     matlab.ui.control.Button
+        cosEditField                 matlab.ui.control.NumericEditField
+        cosEditFieldLabel            matlab.ui.control.Label
+        Button_8                     matlab.ui.control.Button
+        sinEditField                 matlab.ui.control.NumericEditField
+        sinEditFieldLabel            matlab.ui.control.Label
+        Button_7                     matlab.ui.control.Button
+        CHEATSHEETButton             matlab.ui.control.Button
+        CheatSheet                   matlab.ui.container.Panel
+        Image2                       matlab.ui.control.Image
+        NOTESLabel_4                 matlab.ui.control.Label
+        NOTESLabel_3                 matlab.ui.control.Label
+        AngleEditField               matlab.ui.control.NumericEditField
+        adjEditField                 matlab.ui.control.NumericEditField
+        oppEditField                 matlab.ui.control.NumericEditField
+        DrawRightTriangleButton      matlab.ui.control.Button
+        PLAYGROUNDLabel              matlab.ui.control.Label
+        Image                        matlab.ui.control.Image
+        HypotenuseEditField          matlab.ui.control.NumericEditField
+        HypotenuseEditFieldLabel     matlab.ui.control.Label
+        Button_6                     matlab.ui.control.Button
+        AngleSlider                  matlab.ui.control.Slider
+        AngleLabel                   matlab.ui.control.Label
+        AdjacentSlider               matlab.ui.control.Slider
+        AdjacentSliderLabel          matlab.ui.control.Label
+        Button_4                     matlab.ui.control.Button
+        Button_3                     matlab.ui.control.Button
+        Button                       matlab.ui.control.Button
+        OppositeSlider               matlab.ui.control.Slider
+        OppositeSliderLabel          matlab.ui.control.Label
+        Button_2                     matlab.ui.control.Button
+        TRIGONOMETRICFUNCTIONSLabel  matlab.ui.control.Label
+        UIAxes                       matlab.ui.control.UIAxes
+    end
+
+    
+    methods (Access = private)
+        function updateTriangle(app, oppVal, adjVal)
+            sF = 2.5; % image scaling
+            
+            % Use passed-in slider values instead of reading from UI components
+            opp = oppVal * sF;
+            adj = adjVal * sF;
+            
+            hyp = sqrt(opp^2 + adj^2);
+            
+            % Calculate angles
+            angle = atand(opp / adj);
+            
+            % Update angle sliders and hypotenuse field
+            app.AngleSlider.Value = angle;
+
+            app.HypotenuseEditField.Enable = "off";
+            app.oppEditField.Enable = "off";
+            app.adjEditField.Enable = "off";
+       
+            app.AngleEditField.Enable = "off";
+            
+
+            app.HypotenuseEditField.Value = round(hyp / sF, 2);
+
+            app.oppEditField.Value = oppVal;
+            app.adjEditField.Value = adjVal;
+
+            app.AngleEditField.Value = angle;
+
+            app.sinEditField.Value = sind(angle);
+            app.cosEditField.Value = cosd(angle);
+            app.tanEditField.Value = tand(angle);
+           
+            
+            % Clear and redraw the triangle
+            cla(app.UIAxes)
+            hold(app.UIAxes, 'on')
+
+           % --------------------------DRAW AND LABEL----------------------------%
+
+            % Font settings for labels
+            labelFont = 'Yuanti SC';
+            labelSize = 24;
+            paddingX = 1;
+            paddingY = 1;
+
+            
+            % Plot side A (vertical)
+            plot(app.UIAxes, [0 0], [0 opp], 'LineWidth', 3, 'Color', '#37a771')
+            
+            % Plot side B (horizontal)
+            plot(app.UIAxes, [0 adj], [0 0], 'LineWidth', 3, 'Color', '#f7b11a')
+            
+            % Plot hypotenuse (side C)
+            plot(app.UIAxes, [adj 0], [0 opp], 'LineWidth', 3, 'Color', '#7f6ff2')
+            
+            % Plot vertices with markers
+            plot(app.UIAxes, [0 adj 0], [0 0 opp], 'o', 'MarkerSize', 6, 'MarkerFaceColor', '#555555')
+            
+
+            % Coordinates of vertices
+            
+            vertexB = [adj, 0];     % Bottom-right
+            
+            
+            % Add text labels
+            
+            text(app.UIAxes, vertexB(1), vertexB(2), 'θ', ...
+                'FontSize', 24, 'FontName', labelFont, ...
+                'Color', 'black', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'top');
+            
+            
+            
+               axis(app.UIAxes, 'equal');
+                padding = 3;
+                maxX = adj + padding;
+                maxY = opp + padding;
+                xlim(app.UIAxes, [-padding, max(maxX, 10)]);
+                ylim(app.UIAxes, [-padding, max(maxY, 10)]);
+                grid(app.UIAxes, 'on');
+                app.UIAxes.Box = 'on';
+                app.UIAxes.XColor = [0.3 0.3 0.3];
+                app.UIAxes.YColor = [0.3 0.3 0.3];
+                app.UIAxes.Color = [1 1 1];
+            
+            
+            % Label Side A (vertical)
+            midAC = [0, opp/2];
+            text(app.UIAxes, midAC(1) - paddingX, midAC(2), 'opp   ', ...
+                'FontSize', labelSize, 'FontName', labelFont, ...
+                'Color', '#37a771', 'HorizontalAlignment', 'center')
+            
+            % Label Side B (horizontal)
+            midAB = [adj/2, 0];
+            text(app.UIAxes, midAB(1), midAB(2) - paddingX, 'adj', ...
+                'FontSize', labelSize, 'FontName', labelFont, ...
+                'Color', '#f7b11a', 'HorizontalAlignment', 'center')
+            
+            % Label Side C (hypotenuse)
+            midBC = [adj/2, opp/2];
+            text(app.UIAxes, midBC(1) + paddingX, midBC(2) + paddingY, '   hyp', ...
+                'FontSize', labelSize, 'FontName', labelFont, ...
+                'Color', '#7f6ff2', 'HorizontalAlignment', 'center')
+        end
+
+        
+        
+
+    end
+
+
+        methods (Access = private)
+
+        % Create UIFigure and components 
+    end
+
+    methods (Access = private)
+        % Startup function runs right after UI components are created, before user sees app
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Value changed function: OppositeSlider
+        function OppositeSliderValueChanged(app, event)
+           app.AdjacentSlider.Enable = "on"; 
+           app.AngleSlider.Enable = "on";
+           
+
+        end
+
+        % Value changing function: AdjacentSlider
+        function AdjacentSliderValueChanging(app, event)
+            % only lets user change SIDE B component at a time
+            app.OppositeSlider.Enable = "off"; 
+            app.AngleSlider.Enable = "off";
+            
+            
+            app.updateTriangle(app.OppositeSlider.Value, event.Value);
+            
+        end
+
+        % Value changing function: OppositeSlider
+        function OppositeSliderValueChanging(app, event)
+            % only lets user change SIDE A component at a time
+            app.AdjacentSlider.Enable = "off"; 
+            app.AngleSlider.Enable = "off";
+            
+            
+            app.updateTriangle(event.Value, app.AdjacentSlider.Value);
+            
+        end
+
+        % Value changed function: AdjacentSlider
+        function AdjacentSliderValueChanged(app, event)
+           app.OppositeSlider.Enable = "on"; 
+           app.AngleSlider.Enable = "on";
+           
+        end
+
+        % Value changing function: AngleSlider
+        function AngleSliderValueChanging(app, event)
+            % Disable other sliders
+            app.OppositeSlider.Enable = "off";
+            app.AdjacentSlider.Enable = "off";
+        
+        
+            % Get the new angleA
+            angleA = event.Value;
+        
+            % Define base unit side and scale factor
+            sideA = app.OppositeSlider.Value;
+        
+            % Calculate sideB
+            sideB = sideA / tand(angleA);
+        
+            % Scale both sides for visibility
+        
+            % Update the triangle drawing
+            app.updateTriangle(sideA, sideB);
+
+            app.OppositeSlider.Enable = "on";
+            app.AdjacentSlider.Enable = "on";
+            
+
+            
+        end
+
+        % Button pushed function: DrawRightTriangleButton
+        function DrawRightTriangleButtonPushed(app, event)
+            app.OppositeSlider.Value = 3;
+            app.AdjacentSlider.Value = 4;
+            app.updateTriangle(3,4);
+        end
+
+        % Button pushed function: CHEATSHEETButton
+        function CHEATSHEETButtonPushed(app, event)
+            if strcmp(app.CheatSheet.Visible, "on")
+                % close 
+                app.CheatSheet.Visible = "off";
+                
+            else
+    
+                % open 
+                app.CheatSheet.Visible = "on";
+               
+            end
+        end
+
+        % Value changed function: AngleSlider
+        function AngleSliderValueChanged(app, event)
+            app.OppositeSlider.Enable = "on";
+            app.AdjacentSlider.Enable = "on";
+            
+        end
+
+        % Menu selected function: PythagoreanTheoremMenu
+        function PythagoreanTheoremMenuSelected(app, event)
+            app.QuizModeLabel.Text = ' Taking you to Lesson Mode: Pythagorean Theorem... 📚';
+            app.QuizModeLabel.BackgroundColor = [0.96 0.47 0.16];
+            pause(2.0);
+            app.QuizModeLabel.Text = '';
+          
+            TRIGLESSON();
+
+            delete(app);
+        end
+
+        % Menu selected function: PracticeModeMenu
+        function PracticeModeMenuSelected(app, event)
+            app.QuizModeLabel.Text = ' Taking you to Practice Mode... 📝';
+            app.QuizModeLabel.BackgroundColor = [0.96 0.47 0.16];
+            pause(2.0);
+            app.QuizModeLabel.Text = '';
+          
+            TRIGQUIZ();
+
+            delete(app);
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Get the file path for locating images
+            pathToMLAPP = fileparts(mfilename('fullpath'));
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Color = [1 0.949 0.851];
+            app.UIFigure.Position = [100 100 1237 898];
+            app.UIFigure.Name = 'MATLAB App';
+            app.UIFigure.Theme = 'light';
+
+            % Create Menu
+            app.Menu = uimenu(app.UIFigure);
+            app.Menu.Text = 'Menu';
+
+            % Create LessonModeMenu
+            app.LessonModeMenu = uimenu(app.Menu);
+            app.LessonModeMenu.Text = 'Lesson Mode';
+
+            % Create PythagoreanTheoremMenu
+            app.PythagoreanTheoremMenu = uimenu(app.LessonModeMenu);
+            app.PythagoreanTheoremMenu.MenuSelectedFcn = createCallbackFcn(app, @PythagoreanTheoremMenuSelected, true);
+            app.PythagoreanTheoremMenu.Text = 'Pythagorean Theorem';
+
+            % Create PracticeModeMenu
+            app.PracticeModeMenu = uimenu(app.Menu);
+            app.PracticeModeMenu.MenuSelectedFcn = createCallbackFcn(app, @PracticeModeMenuSelected, true);
+            app.PracticeModeMenu.Separator = 'on';
+            app.PracticeModeMenu.Text = 'Practice Mode';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.Toolbar.Visible = 'off';
+            app.UIAxes.FontName = 'Yuanti SC';
+            app.UIAxes.XColor = 'none';
+            app.UIAxes.XTick = [];
+            app.UIAxes.YColor = 'none';
+            app.UIAxes.YTick = [];
+            app.UIAxes.ZColor = 'none';
+            app.UIAxes.FontSize = 18;
+            app.UIAxes.Position = [49 465 725 322];
+
+            % Create TRIGONOMETRICFUNCTIONSLabel
+            app.TRIGONOMETRICFUNCTIONSLabel = uilabel(app.UIFigure);
+            app.TRIGONOMETRICFUNCTIONSLabel.BackgroundColor = [0.8196 0.0157 0.5451];
+            app.TRIGONOMETRICFUNCTIONSLabel.HorizontalAlignment = 'center';
+            app.TRIGONOMETRICFUNCTIONSLabel.FontName = 'Yuanti SC';
+            app.TRIGONOMETRICFUNCTIONSLabel.FontSize = 36;
+            app.TRIGONOMETRICFUNCTIONSLabel.FontWeight = 'bold';
+            app.TRIGONOMETRICFUNCTIONSLabel.FontColor = [1 1 1];
+            app.TRIGONOMETRICFUNCTIONSLabel.Position = [1 825 1237 62];
+            app.TRIGONOMETRICFUNCTIONSLabel.Text = 'TRIGONOMETRIC FUNCTIONS';
+
+            % Create Button_2
+            app.Button_2 = uibutton(app.UIFigure, 'push');
+            app.Button_2.BackgroundColor = [0.2196 0.651 0.4392];
+            app.Button_2.Position = [42 247 435 54];
+            app.Button_2.Text = '';
+
+            % Create OppositeSliderLabel
+            app.OppositeSliderLabel = uilabel(app.UIFigure);
+            app.OppositeSliderLabel.HorizontalAlignment = 'right';
+            app.OppositeSliderLabel.FontName = 'Yuanti SC';
+            app.OppositeSliderLabel.FontSize = 24;
+            app.OppositeSliderLabel.FontWeight = 'bold';
+            app.OppositeSliderLabel.FontColor = [1 1 1];
+            app.OppositeSliderLabel.Position = [54 263 100 32];
+            app.OppositeSliderLabel.Text = 'Opposite';
+
+            % Create OppositeSlider
+            app.OppositeSlider = uislider(app.UIFigure);
+            app.OppositeSlider.Limits = [0 10];
+            app.OppositeSlider.MajorTicks = [0 1 2 3 4 5 6 7 8 9 10];
+            app.OppositeSlider.ValueChangedFcn = createCallbackFcn(app, @OppositeSliderValueChanged, true);
+            app.OppositeSlider.ValueChangingFcn = createCallbackFcn(app, @OppositeSliderValueChanging, true);
+            app.OppositeSlider.Step = 1;
+            app.OppositeSlider.FontName = 'Yuanti SC';
+            app.OppositeSlider.FontWeight = 'bold';
+            app.OppositeSlider.FontColor = [1 1 1];
+            app.OppositeSlider.Position = [176 282 150 3];
+            app.OppositeSlider.Value = 3;
+
+            % Create Button
+            app.Button = uibutton(app.UIFigure, 'push');
+            app.Button.Position = [-112 962 2 2];
+
+            % Create Button_3
+            app.Button_3 = uibutton(app.UIFigure, 'push');
+            app.Button_3.BackgroundColor = [0.9686 0.6902 0.102];
+            app.Button_3.Position = [42 179 435 54];
+            app.Button_3.Text = '';
+
+            % Create Button_4
+            app.Button_4 = uibutton(app.UIFigure, 'push');
+            app.Button_4.BackgroundColor = [0.9686 0.5098 0.9098];
+            app.Button_4.Position = [41 27 437 54];
+            app.Button_4.Text = '';
+
+            % Create AdjacentSliderLabel
+            app.AdjacentSliderLabel = uilabel(app.UIFigure);
+            app.AdjacentSliderLabel.HorizontalAlignment = 'right';
+            app.AdjacentSliderLabel.FontName = 'Yuanti SC';
+            app.AdjacentSliderLabel.FontSize = 24;
+            app.AdjacentSliderLabel.FontWeight = 'bold';
+            app.AdjacentSliderLabel.FontColor = [1 1 1];
+            app.AdjacentSliderLabel.Position = [55 195 101 32];
+            app.AdjacentSliderLabel.Text = 'Adjacent';
+
+            % Create AdjacentSlider
+            app.AdjacentSlider = uislider(app.UIFigure);
+            app.AdjacentSlider.Limits = [0 10];
+            app.AdjacentSlider.MajorTicks = [0 1 2 3 4 5 6 7 8 9 10];
+            app.AdjacentSlider.ValueChangedFcn = createCallbackFcn(app, @AdjacentSliderValueChanged, true);
+            app.AdjacentSlider.ValueChangingFcn = createCallbackFcn(app, @AdjacentSliderValueChanging, true);
+            app.AdjacentSlider.Step = 1;
+            app.AdjacentSlider.FontName = 'Yuanti SC';
+            app.AdjacentSlider.FontWeight = 'bold';
+            app.AdjacentSlider.FontColor = [1 1 1];
+            app.AdjacentSlider.Position = [178 214 150 3];
+            app.AdjacentSlider.Value = 4;
+
+            % Create AngleLabel
+            app.AngleLabel = uilabel(app.UIFigure);
+            app.AngleLabel.HorizontalAlignment = 'right';
+            app.AngleLabel.FontName = 'Yuanti SC';
+            app.AngleLabel.FontSize = 24;
+            app.AngleLabel.FontWeight = 'bold';
+            app.AngleLabel.FontColor = [1 1 1];
+            app.AngleLabel.Position = [55 43 83 32];
+            app.AngleLabel.Text = 'Angle θ';
+
+            % Create AngleSlider
+            app.AngleSlider = uislider(app.UIFigure);
+            app.AngleSlider.Limits = [0 90];
+            app.AngleSlider.ValueChangedFcn = createCallbackFcn(app, @AngleSliderValueChanged, true);
+            app.AngleSlider.ValueChangingFcn = createCallbackFcn(app, @AngleSliderValueChanging, true);
+            app.AngleSlider.MinorTicks = [0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90];
+            app.AngleSlider.Step = 5;
+            app.AngleSlider.FontName = 'Yuanti SC';
+            app.AngleSlider.FontWeight = 'bold';
+            app.AngleSlider.FontColor = [1 1 1];
+            app.AngleSlider.Position = [180 62 150 3];
+
+            % Create Button_6
+            app.Button_6 = uibutton(app.UIFigure, 'push');
+            app.Button_6.BackgroundColor = [0.502 0.4392 0.949];
+            app.Button_6.Position = [42 104 435 54];
+            app.Button_6.Text = '';
+
+            % Create HypotenuseEditFieldLabel
+            app.HypotenuseEditFieldLabel = uilabel(app.UIFigure);
+            app.HypotenuseEditFieldLabel.HorizontalAlignment = 'right';
+            app.HypotenuseEditFieldLabel.FontName = 'Yuanti SC';
+            app.HypotenuseEditFieldLabel.FontSize = 24;
+            app.HypotenuseEditFieldLabel.FontWeight = 'bold';
+            app.HypotenuseEditFieldLabel.FontColor = [1 1 1];
+            app.HypotenuseEditFieldLabel.Position = [53 116 132 32];
+            app.HypotenuseEditFieldLabel.Text = 'Hypotenuse';
+
+            % Create HypotenuseEditField
+            app.HypotenuseEditField = uieditfield(app.UIFigure, 'numeric');
+            app.HypotenuseEditField.Editable = 'off';
+            app.HypotenuseEditField.FontName = 'Yuanti SC';
+            app.HypotenuseEditField.FontSize = 24;
+            app.HypotenuseEditField.FontWeight = 'bold';
+            app.HypotenuseEditField.FontColor = [0.302 0.2824 0.2824];
+            app.HypotenuseEditField.Position = [347 115 110 32];
+
+            % Create Image
+            app.Image = uiimage(app.UIFigure);
+            app.Image.Position = [914 27 334 273];
+            app.Image.ImageSource = fullfile(pathToMLAPP, 'mascot.png');
+
+            % Create PLAYGROUNDLabel
+            app.PLAYGROUNDLabel = uilabel(app.UIFigure);
+            app.PLAYGROUNDLabel.BackgroundColor = [0.949 0.4039 0.7725];
+            app.PLAYGROUNDLabel.HorizontalAlignment = 'center';
+            app.PLAYGROUNDLabel.FontName = 'Yuanti SC';
+            app.PLAYGROUNDLabel.FontSize = 36;
+            app.PLAYGROUNDLabel.FontWeight = 'bold';
+            app.PLAYGROUNDLabel.FontColor = [1 1 1];
+            app.PLAYGROUNDLabel.Position = [2 334 1235 62];
+            app.PLAYGROUNDLabel.Text = 'PLAYGROUND';
+
+            % Create DrawRightTriangleButton
+            app.DrawRightTriangleButton = uibutton(app.UIFigure, 'push');
+            app.DrawRightTriangleButton.ButtonPushedFcn = createCallbackFcn(app, @DrawRightTriangleButtonPushed, true);
+            app.DrawRightTriangleButton.BackgroundColor = [0.8196 0.0157 0.5451];
+            app.DrawRightTriangleButton.FontName = 'Yuanti SC';
+            app.DrawRightTriangleButton.FontSize = 18;
+            app.DrawRightTriangleButton.FontWeight = 'bold';
+            app.DrawRightTriangleButton.FontColor = [1 1 1];
+            app.DrawRightTriangleButton.Position = [85 414 230 39];
+            app.DrawRightTriangleButton.Text = '▲ Draw RightTriangle';
+
+            % Create oppEditField
+            app.oppEditField = uieditfield(app.UIFigure, 'numeric');
+            app.oppEditField.Editable = 'off';
+            app.oppEditField.FontName = 'Yuanti SC';
+            app.oppEditField.FontSize = 24;
+            app.oppEditField.FontWeight = 'bold';
+            app.oppEditField.FontColor = [0.302 0.2824 0.2824];
+            app.oppEditField.Position = [348 258 110 32];
+
+            % Create adjEditField
+            app.adjEditField = uieditfield(app.UIFigure, 'numeric');
+            app.adjEditField.Editable = 'off';
+            app.adjEditField.FontName = 'Yuanti SC';
+            app.adjEditField.FontSize = 24;
+            app.adjEditField.FontWeight = 'bold';
+            app.adjEditField.FontColor = [0.302 0.2824 0.2824];
+            app.adjEditField.Position = [348 190 110 32];
+
+            % Create AngleEditField
+            app.AngleEditField = uieditfield(app.UIFigure, 'numeric');
+            app.AngleEditField.Editable = 'off';
+            app.AngleEditField.FontName = 'Yuanti SC';
+            app.AngleEditField.FontSize = 24;
+            app.AngleEditField.FontWeight = 'bold';
+            app.AngleEditField.FontColor = [0.302 0.2824 0.2824];
+            app.AngleEditField.Position = [352 38 110 32];
+
+            % Create CheatSheet
+            app.CheatSheet = uipanel(app.UIFigure);
+            app.CheatSheet.ForegroundColor = [1 1 1];
+            app.CheatSheet.Visible = 'off';
+            app.CheatSheet.BackgroundColor = [0.1608 0.349 0.749];
+            app.CheatSheet.Position = [809 426 389 347];
+
+            % Create NOTESLabel_3
+            app.NOTESLabel_3 = uilabel(app.CheatSheet);
+            app.NOTESLabel_3.BackgroundColor = [1 0.9098 0.3922];
+            app.NOTESLabel_3.HorizontalAlignment = 'center';
+            app.NOTESLabel_3.WordWrap = 'on';
+            app.NOTESLabel_3.FontName = 'Yuanti SC';
+            app.NOTESLabel_3.FontSize = 18;
+            app.NOTESLabel_3.FontWeight = 'bold';
+            app.NOTESLabel_3.FontColor = [0.0706 0.4392 0.749];
+            app.NOTESLabel_3.Position = [1 295 389 29];
+            app.NOTESLabel_3.Text = '🔺 GENERAL PROPERTIES 🔺';
+
+            % Create NOTESLabel_4
+            app.NOTESLabel_4 = uilabel(app.CheatSheet);
+            app.NOTESLabel_4.WordWrap = 'on';
+            app.NOTESLabel_4.FontName = 'Yuanti SC';
+            app.NOTESLabel_4.FontSize = 18;
+            app.NOTESLabel_4.FontColor = [1 1 1];
+            app.NOTESLabel_4.Position = [14 175 374 111];
+            app.NOTESLabel_4.Text = {'• Helpful Abbreviation: SOH-CAH-TOA'; ''; '• sin = opposite / hypotenuse'; '• cos = adjacent / hypotenuse'; '• tan = opposite / adjacent'};
+
+            % Create Image2
+            app.Image2 = uiimage(app.CheatSheet);
+            app.Image2.Position = [28 13 344 143];
+            app.Image2.ImageSource = fullfile(pathToMLAPP, 'trig_table.png');
+
+            % Create CHEATSHEETButton
+            app.CHEATSHEETButton = uibutton(app.UIFigure, 'push');
+            app.CHEATSHEETButton.ButtonPushedFcn = createCallbackFcn(app, @CHEATSHEETButtonPushed, true);
+            app.CHEATSHEETButton.BackgroundColor = [0.1608 0.349 0.749];
+            app.CHEATSHEETButton.FontName = 'Yuanti SC';
+            app.CHEATSHEETButton.FontSize = 24;
+            app.CHEATSHEETButton.FontWeight = 'bold';
+            app.CHEATSHEETButton.FontColor = [1 1 1];
+            app.CHEATSHEETButton.Position = [870 760 267 39];
+            app.CHEATSHEETButton.Text = 'CHEAT SHEET 🗒️';
+
+            % Create Button_7
+            app.Button_7 = uibutton(app.UIFigure, 'push');
+            app.Button_7.BackgroundColor = [0.1608 0.349 0.749];
+            app.Button_7.Position = [594 215 259 54];
+            app.Button_7.Text = '';
+
+            % Create sinEditFieldLabel
+            app.sinEditFieldLabel = uilabel(app.UIFigure);
+            app.sinEditFieldLabel.HorizontalAlignment = 'right';
+            app.sinEditFieldLabel.FontName = 'Yuanti SC';
+            app.sinEditFieldLabel.FontSize = 24;
+            app.sinEditFieldLabel.FontWeight = 'bold';
+            app.sinEditFieldLabel.FontColor = [1 1 1];
+            app.sinEditFieldLabel.Position = [607 230 71 32];
+            app.sinEditFieldLabel.Text = 'sin (θ)';
+
+            % Create sinEditField
+            app.sinEditField = uieditfield(app.UIFigure, 'numeric');
+            app.sinEditField.Editable = 'off';
+            app.sinEditField.FontName = 'Yuanti SC';
+            app.sinEditField.FontSize = 24;
+            app.sinEditField.FontWeight = 'bold';
+            app.sinEditField.FontColor = [0.302 0.2824 0.2824];
+            app.sinEditField.Position = [716 225 110 32];
+
+            % Create Button_8
+            app.Button_8 = uibutton(app.UIFigure, 'push');
+            app.Button_8.BackgroundColor = [0.6784 0.8588 0.0863];
+            app.Button_8.Position = [594 145 259 54];
+            app.Button_8.Text = '';
+
+            % Create cosEditFieldLabel
+            app.cosEditFieldLabel = uilabel(app.UIFigure);
+            app.cosEditFieldLabel.HorizontalAlignment = 'right';
+            app.cosEditFieldLabel.FontName = 'Yuanti SC';
+            app.cosEditFieldLabel.FontSize = 24;
+            app.cosEditFieldLabel.FontWeight = 'bold';
+            app.cosEditFieldLabel.FontColor = [1 1 1];
+            app.cosEditFieldLabel.Position = [601 160 77 32];
+            app.cosEditFieldLabel.Text = 'cos (θ)';
+
+            % Create cosEditField
+            app.cosEditField = uieditfield(app.UIFigure, 'numeric');
+            app.cosEditField.Editable = 'off';
+            app.cosEditField.FontName = 'Yuanti SC';
+            app.cosEditField.FontSize = 24;
+            app.cosEditField.FontWeight = 'bold';
+            app.cosEditField.FontColor = [0.302 0.2824 0.2824];
+            app.cosEditField.Position = [716 155 110 32];
+
+            % Create Button_9
+            app.Button_9 = uibutton(app.UIFigure, 'push');
+            app.Button_9.BackgroundColor = [0.0157 0.7412 0.8196];
+            app.Button_9.Position = [593 73 259 54];
+            app.Button_9.Text = '';
+
+            % Create tanEditFieldLabel
+            app.tanEditFieldLabel = uilabel(app.UIFigure);
+            app.tanEditFieldLabel.HorizontalAlignment = 'right';
+            app.tanEditFieldLabel.FontName = 'Yuanti SC';
+            app.tanEditFieldLabel.FontSize = 24;
+            app.tanEditFieldLabel.FontWeight = 'bold';
+            app.tanEditFieldLabel.FontColor = [1 1 1];
+            app.tanEditFieldLabel.Position = [600 88 77 32];
+            app.tanEditFieldLabel.Text = 'tan (θ)';
+
+            % Create tanEditField
+            app.tanEditField = uieditfield(app.UIFigure, 'numeric');
+            app.tanEditField.Editable = 'off';
+            app.tanEditField.FontName = 'Yuanti SC';
+            app.tanEditField.FontSize = 24;
+            app.tanEditField.FontWeight = 'bold';
+            app.tanEditField.FontColor = [0.302 0.2824 0.2824];
+            app.tanEditField.Position = [715 83 110 32];
+
+            % Create QuizModeLabel
+            app.QuizModeLabel = uilabel(app.UIFigure);
+            app.QuizModeLabel.HorizontalAlignment = 'center';
+            app.QuizModeLabel.FontName = 'Yuanti SC';
+            app.QuizModeLabel.FontSize = 24;
+            app.QuizModeLabel.FontWeight = 'bold';
+            app.QuizModeLabel.FontAngle = 'italic';
+            app.QuizModeLabel.FontColor = [1 0.9098 0.3882];
+            app.QuizModeLabel.Position = [401 378 514 147];
+            app.QuizModeLabel.Text = '';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = TRIG_FUNC
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
