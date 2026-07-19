@@ -2,8 +2,11 @@
 ## Interactive MATLAB Triangle Learning App for Middle School Students
 
 > Voted Best App & Overall Project by peers in Foundations of Engineering Design Thinking II (ENED 1120) course
+
 Name: Aisha Arina Jahin
+
 Course: Foundations of Engineering Design Thinking II (ENED 1120) at University of Cincinnati
+
 Date: May 2025 - July 2025
 
 ## Description
